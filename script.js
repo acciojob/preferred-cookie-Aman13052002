@@ -1,49 +1,77 @@
-//your JS code here. If required.
-const form = document.querySelector('form');
-const fontsize = document.querySelector('#fontsize');
-const fontcolor = document.querySelector('#fontcolor');
+const form = document.getElementById("settingsForm");
+  const fontsizeInput = document.getElementById("fontsize");
+  const fontcolorInput = document.getElementById("fontcolor");
 
-function applyPreferences(size, color) {
-      document.documentElement.style.setProperty(
-        "--fontsize",
-        size + "px"
-      );
+  // Set Cookie
+  function setCookie(name, value, days = 365) {
+    const date = new Date();
 
-      document.documentElement.style.setProperty(
-        "--fontcolor",
-        color
-      );
-}
+    date.setTime(
+      date.getTime() + (days * 24 * 60 * 60 * 1000)
+    );
 
-window.onload = function () {
-      const savedSize = localStorage.getItem("fontsize");
-      const savedColor = localStorage.getItem("fontcolor");
+    document.cookie =
+      `${name}=${value}; expires=${date.toUTCString()}; path=/`;
+  }
 
-      if (savedSize) {
-        fontsize.value = savedSize;
+  // Get Cookie
+  function getCookie(name) {
+    const cookies = document.cookie.split(";");
+
+    for (let cookie of cookies) {
+      cookie = cookie.trim();
+
+      if (cookie.startsWith(name + "=")) {
+        return cookie.substring(name.length + 1);
       }
+    }
 
-      if (savedColor) {
-        fontcolor.value = savedColor;
-      }
+    return null;
+  }
 
-      applyPreferences(
-        savedSize || 16,
-        savedColor || "#000000"
-      );
-    };
+  // Apply styles
+  function applyPreferences(size, color) {
+    document.documentElement.style.setProperty(
+      "--fontsize",
+      size + "px"
+    );
 
-    // Save preferences
-    form.addEventListener("submit", function (e) {
-      e.preventDefault();
+    document.documentElement.style.setProperty(
+      "--fontcolor",
+      color
+    );
+  }
 
-      const size = fontsize.value;
-      const color = fontcolor.value;
+  // Load saved preferences
+  window.onload = function () {
+    const savedSize = getCookie("fontsize");
+    const savedColor = getCookie("fontcolor");
 
-      // Store in localStorage
-      localStorage.setItem("fontsize", size);
-      localStorage.setItem("fontcolor", color);
+    if (savedSize) {
+      fontsizeInput.value = savedSize;
+    }
 
-      // Apply styles immediately
-      applyPreferences(size, color);
-    });
+    if (savedColor) {
+      fontcolorInput.value = savedColor;
+    }
+
+    applyPreferences(
+      savedSize || 16,
+      savedColor || "#000000"
+    );
+  };
+
+  // Save button
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    const size = fontsizeInput.value;
+    const color = fontcolorInput.value;
+
+    // Save cookies
+    setCookie("fontsize", size);
+    setCookie("fontcolor", color);
+
+    // Apply immediately
+    applyPreferences(size, color);
+  });
